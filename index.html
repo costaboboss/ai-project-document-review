@@ -1,359 +1,41 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Продуктовая гипотеза, план MVP, команда и бюджет системы ИИ-контроля проектной документации.">
-  <title>ИИ-контроль проектной документации</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23081428'/%3E%3Cpath d='M8 23V9h9l7 7-7 7H8Zm4-4h4.2l3-3-3-3H12v6Z' fill='%2300c2e5'/%3E%3C/svg%3E">
-  <style>
-    :root{
-      --ink:#0a1730;--ink-2:#15294c;--paper:#f6f9fd;--white:#fff;
-      --cyan:#00b8d9;--blue:#2b66ed;--amber:#ffb431;--red:#ff6b68;
-      --muted:#6f7f97;--line:rgba(10,23,48,.12);--glass:rgba(255,255,255,.78);
-      --shadow:0 24px 80px rgba(8,20,40,.18);--radius:1.25rem;
-    }
-    *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden}
-    body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#071225;-webkit-font-smoothing:antialiased}
-    button,a{font:inherit} button{cursor:pointer}
-    .deck{position:relative;width:100%;height:100%;isolation:isolate}
-    .ambient{position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 80% 15%,rgba(0,184,217,.22),transparent 28%),radial-gradient(circle at 15% 90%,rgba(43,102,237,.20),transparent 32%),#071225}
-    .ambient::after{content:"";position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,black,transparent 80%)}
-    .slide{position:absolute;inset:0;display:grid;place-items:center;padding:clamp(1rem,3vw,2.75rem);opacity:0;visibility:hidden;transform:translateX(40px) scale(.985);transition:opacity .38s ease,transform .38s ease,visibility .38s;pointer-events:none}
-    .slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto}
-    .slide.previous{transform:translateX(-40px) scale(.985)}
-    .frame{position:relative;width:min(94vw,1600px);height:min(88vh,900px);aspect-ratio:16/9;overflow:hidden;border-radius:clamp(.8rem,1.6vw,1.6rem);background:var(--paper);box-shadow:var(--shadow)}
-    .content{height:100%;padding:clamp(2rem,4.3vw,5rem);display:flex;flex-direction:column;position:relative}
-    .dark .frame{color:#fff;background:linear-gradient(145deg,#081428 0%,#102d5d 65%,#087b93 140%)}
-    .dark .frame::after{content:"";position:absolute;width:42%;aspect-ratio:1;border-radius:50%;right:-12%;top:-30%;border:1px solid rgba(255,255,255,.15);box-shadow:0 0 0 90px rgba(255,255,255,.025),0 0 0 180px rgba(255,255,255,.02)}
-    .eyebrow{display:flex;align-items:center;gap:.65rem;color:var(--blue);font-size:clamp(.68rem,.85vw,.92rem);letter-spacing:.15em;text-transform:uppercase;font-weight:800}
-    .eyebrow::before{content:"";width:1.9rem;height:3px;background:currentColor;border-radius:2px}.dark .eyebrow{color:#69e6f7}
-    h1,h2,h3,p{margin-top:0} h1{font-size:clamp(2.7rem,5.4vw,6.4rem);line-height:.93;letter-spacing:-.058em;max-width:1100px;margin:auto 0 1.5rem}
-    h2{font-size:clamp(2rem,3.8vw,4.5rem);line-height:1.02;letter-spacing:-.045em;margin:.7rem 0 clamp(1.3rem,2.5vw,2.6rem);max-width:1250px}
-    h3{font-size:clamp(1rem,1.35vw,1.5rem);line-height:1.18;margin:0 0 .55rem}
-    p,li{font-size:clamp(.88rem,1.13vw,1.26rem);line-height:1.42}.lead{font-size:clamp(1.15rem,1.75vw,1.9rem);line-height:1.38;max-width:1100px;color:var(--ink-2)}.dark .lead{color:#d9edff}
-    .muted{color:var(--muted)} .dark .muted{color:#a8c1db}
-    .hero-meta{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:auto}.pill{padding:.55rem .8rem;border:1px solid rgba(255,255,255,.26);border-radius:999px;font-size:.82rem;color:#d8edff}
-    .title-rule{width:min(690px,72%);height:1px;background:rgba(255,255,255,.25);margin:0 0 1.2rem}.footer-line{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:#a9c7df}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2vw,2rem);min-height:0}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.5vw,1.4rem);min-height:0}.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem}
-    .card{padding:clamp(1rem,1.6vw,1.65rem);border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.8);min-height:0}.card.tint{background:#eaf2ff;border-color:#cfe0ff}.card.dark-card{background:var(--ink);color:#fff}.card h3{color:var(--blue)}.card.dark-card h3{color:#6ee6f7}
-    ul{margin:.55rem 0 0;padding-left:1.15rem}li{margin:.42rem 0}li::marker{color:var(--blue)}
-    .statement{margin:auto 0;padding:clamp(1.35rem,2.7vw,2.6rem);border-left:6px solid var(--blue);background:#e9f1ff;font-size:clamp(1.25rem,2vw,2.2rem);line-height:1.28;font-weight:750;border-radius:0 var(--radius) var(--radius) 0}
-    .flow{display:flex;align-items:center;justify-content:space-between;gap:.55rem;margin:auto 0}.flow-step{flex:1;min-height:8.4rem;display:flex;flex-direction:column;justify-content:space-between;padding:1.2rem;border-radius:1rem;background:#fff;border:1px solid var(--line);font-weight:700}.flow-step small{color:var(--blue);font-size:.72rem;letter-spacing:.08em}.flow-arrow{color:var(--blue);font-size:1.6rem;font-weight:900}
-    .persona{position:relative;overflow:hidden}.persona .number{position:absolute;right:1rem;top:.4rem;color:#e3eaf5;font-size:4.6rem;font-weight:850}.persona h3,.persona ul{position:relative;z-index:1}
-    .check-card{padding:1.2rem 1rem;border-top:4px solid var(--blue);background:#fff;border-radius:.9rem;box-shadow:0 10px 35px rgba(15,40,80,.07)}.check-card strong{display:block;margin-bottom:.55rem;font-size:1rem}.check-card p{font-size:.88rem;color:var(--muted);margin:0}
-    .issue{display:grid;grid-template-columns:.8fr 1.4fr;gap:2rem;align-items:stretch;margin:auto 0}.issue-panel{padding:1.6rem;border-radius:1.2rem;background:var(--ink);color:#fff}.severity{display:inline-block;padding:.4rem .65rem;border-radius:999px;background:rgba(255,180,49,.16);color:#ffd888;font-size:.78rem;font-weight:800}.issue-panel .metric{font-size:3.5rem;font-weight:850;letter-spacing:-.05em;margin:1.3rem 0 .2rem}.issue-detail{padding:1.65rem;background:#fff;border:1px solid var(--line);border-radius:1.2rem}.source-row{display:grid;grid-template-columns:1fr auto;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--line)}.source-row:last-child{border-bottom:0}.source-row b{color:var(--blue)}
-    .scope{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:auto 0}.scope-col{border-radius:1.2rem;padding:1.35rem}.scope-col.in{background:#e8f8fb;border:1px solid #afe4ec}.scope-col.target{background:#eaf2ff;border:1px solid #cfe0ff}.scope-col.out{background:#f2f4f7;border:1px solid #dce2ea}.scope-col h3{display:flex;align-items:center;gap:.6rem}.scope-col li{font-size:.92rem}.dot{width:.7rem;height:.7rem;border-radius:50%;background:var(--cyan)}.target .dot{background:var(--blue)}.out .dot{background:#9aa6b6}
-    .before-after{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1.3rem;margin:auto 0}.state{padding:1.8rem;border-radius:1.2rem;border:1px solid var(--line);background:#fff}.state.target{background:var(--ink);color:#fff}.state .big{font-size:clamp(1.55rem,2.3vw,2.7rem);font-weight:830;line-height:1.05;margin:.65rem 0}.transform{font-size:2.2rem;color:var(--cyan)}
-    .architecture{display:grid;grid-template-columns:1fr;gap:.55rem;margin:auto 0}.arch-row{display:grid;grid-template-columns:2.4rem 1fr auto;align-items:center;gap:1rem;padding:.75rem 1rem;border-radius:.8rem;background:#fff;border:1px solid var(--line)}.arch-row .icon{width:2.4rem;height:2.4rem;display:grid;place-items:center;border-radius:.7rem;background:#eaf2ff;color:var(--blue);font-weight:850}.arch-row small{color:var(--muted)}.arch-core{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem}.arch-core span{padding:.7rem;border-radius:.7rem;background:var(--ink);color:white;font-size:.82rem;text-align:center}
-    .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:auto 0;position:relative}.phase{padding:1.45rem;border-radius:1.2rem;background:#fff;border:1px solid var(--line);position:relative}.phase::before{content:attr(data-months);position:absolute;right:1rem;top:1rem;color:var(--blue);font-size:.76rem;font-weight:800}.phase .phase-no{font-size:3.4rem;color:#dfe8f7;font-weight:850;line-height:1}.phase h3{margin-top:-.5rem}.gate{display:inline-block;margin-top:.75rem;padding:.45rem .65rem;border-radius:.55rem;background:#eef3fa;color:var(--ink-2);font-size:.75rem;font-weight:700}
-    .roles{display:grid;grid-template-columns:1fr 1.2fr .9fr;gap:1rem;margin:auto 0}.role{padding:1.35rem;border-radius:1.2rem;background:#fff;border:1px solid var(--line)}.role.primary{background:var(--ink);color:#fff;transform:translateY(-.45rem)}.role .fte{color:var(--blue);font-weight:850;font-size:.82rem}.role.primary .fte{color:#6ee6f7}.role p{font-size:.88rem;color:var(--muted)}.role.primary p{color:#bcd0e4}
-    .resource-bars{display:grid;gap:1.1rem;margin:auto 0}.resource{display:grid;grid-template-columns:14rem 1fr 8rem;align-items:center;gap:1rem}.bar{height:1.3rem;border-radius:999px;background:#e6ecf5;overflow:hidden}.bar span{display:block;height:100%;width:var(--value);border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--cyan))}.resource b:last-child{text-align:right;color:var(--blue)}
-    .budget{display:grid;grid-template-columns:1.2fr .8fr;gap:1.5rem;margin:auto 0}.budget-stack{display:flex;height:4.2rem;border-radius:1rem;overflow:hidden;margin:1rem 0}.budget-stack span{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.8rem}.b1{width:31.6%;background:#2b66ed}.b2{width:42.1%;background:#0b86b9}.b3{width:26.3%;background:#15a9a6}.b4{width:0;background:#7a8ba6}.money{font-size:clamp(3rem,5vw,5.8rem);font-weight:880;letter-spacing:-.06em;line-height:.9}.money small{display:block;font-size:.9rem;letter-spacing:0;color:var(--muted);margin-top:.8rem}.budget-list{display:grid;gap:.6rem}.budget-line{display:flex;justify-content:space-between;gap:1rem;padding:.65rem 0;border-bottom:1px solid var(--line);font-size:.92rem}
-    .tech-costs{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:auto 0}.range-card{padding:1.2rem;border-radius:1rem;background:white;border:1px solid var(--line)}.range{display:flex;align-items:center;gap:.7rem}.range-track{height:.55rem;flex:1;background:#e6edf7;border-radius:1rem;overflow:hidden}.range-track span{display:block;width:var(--w);height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan))}.range b{white-space:nowrap;color:var(--blue)}
-    .total-budget{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:auto 0}.total-card{padding:1.8rem;border-radius:1.25rem;background:#fff;border:1px solid var(--line)}.total-card.focus{color:#fff;background:linear-gradient(145deg,#0a1730,#123766)}.total-card .huge{font-size:clamp(3rem,5vw,6rem);font-weight:880;letter-spacing:-.06em;line-height:.9;margin:.8rem 0}.total-card p{font-size:.96rem;color:var(--muted)}.total-card.focus p{color:#c2d4e7}.stage-costs{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}.stage-cost{padding:.8rem;border-radius:.7rem;background:#eff4fb;text-align:center}.stage-cost b{display:block;color:var(--blue);font-size:1.15rem}
-    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:auto 0}.metric-card{padding:1rem;border-radius:.9rem;background:#fff;border:1px solid var(--line)}.metric-card strong{display:block;color:var(--blue);font-size:1.8rem;margin-bottom:.4rem}.metric-card p{font-size:.82rem;margin:0;color:var(--muted)}
-    .risk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem;margin:auto 0}.risk{display:grid;grid-template-columns:2rem 1fr;gap:.75rem;align-items:start;padding:.72rem .85rem;border-radius:.75rem;background:#fff;border:1px solid var(--line)}.risk span{width:2rem;height:2rem;border-radius:.55rem;display:grid;place-items:center;background:#fff0e1;color:#c87300;font-weight:850}.risk p{margin:.1rem 0;font-size:.86rem}
-    .decision{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem 1rem;margin:auto 0}.decision-item{display:flex;gap:.75rem;align-items:flex-start;padding:.65rem 0;border-bottom:1px solid var(--line)}.decision-item span{min-width:1.8rem;height:1.8rem;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-size:.75rem;font-weight:850}.decision-item p{margin:.1rem 0;font-size:.9rem}.ask{margin-top:1rem;padding:1rem 1.2rem;border-radius:.9rem;background:var(--ink);color:#fff;display:flex;justify-content:space-between;align-items:center}.ask strong{font-size:1.2rem}.ask span{color:#8be9f5}
-    .slide-number{position:absolute;right:clamp(1.1rem,2vw,2rem);bottom:clamp(.9rem,1.7vw,1.6rem);color:var(--muted);font-size:.76rem;font-weight:700}.dark .slide-number{color:#9dbbd4}
-    .controls{position:fixed;z-index:20;left:50%;bottom:max(1rem,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:.45rem;padding:.45rem;background:rgba(7,18,37,.78);border:1px solid rgba(255,255,255,.15);border-radius:999px;backdrop-filter:blur(16px)}
-    .controls button,.controls a{width:2.45rem;height:2.45rem;border:0;border-radius:50%;display:grid;place-items:center;color:white;background:transparent;text-decoration:none}.controls button:hover,.controls a:hover{background:rgba(255,255,255,.13)}.controls button:focus-visible,.controls a:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}.counter{min-width:4.4rem;text-align:center;color:#dce9f8;font-size:.78rem;font-variant-numeric:tabular-nums}
-    .progress{position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--cyan));width:0;transition:width .35s ease;z-index:30}
-    .hint{position:fixed;right:1.25rem;top:1.1rem;color:#9db0c9;font-size:.75rem;z-index:20}.mobile-only{display:none}
-    @media(max-width:900px){
-      .slide{padding:.6rem}.frame{width:100%;height:calc(100vh - 1.2rem);aspect-ratio:auto;border-radius:1rem}.content{padding:1.4rem 1.25rem 4.6rem;overflow-y:auto}
-      h2{font-size:2.05rem}.grid-2,.grid-3,.grid-5,.issue,.scope,.before-after,.timeline,.roles,.budget,.tech-costs,.total-budget,.metrics,.risk-grid,.decision{grid-template-columns:1fr}
-      .grid-5,.metrics{grid-template-columns:1fr 1fr}.flow{flex-direction:column;align-items:stretch}.flow-step{min-height:5.5rem}.flow-arrow{transform:rotate(90deg);text-align:center}.before-after .transform{transform:rotate(90deg);text-align:center}.arch-core{grid-template-columns:1fr 1fr}.resource{grid-template-columns:7rem 1fr 4rem}.roles .primary{transform:none}.hint{display:none}.mobile-only{display:inline}.controls{bottom:1.1rem}.slide-number{display:none}
-    }
-    @media print{
-      @page{size:16in 9in;margin:0}html,body{overflow:visible;background:white}.ambient,.controls,.progress,.hint{display:none}.deck{height:auto}.slide{position:relative;display:block;opacity:1;visibility:visible;transform:none;page-break-after:always;padding:0;width:16in;height:9in}.frame{width:16in;height:9in;max-width:none;max-height:none;border-radius:0;box-shadow:none}.content{overflow:hidden}.slide-number{display:block}
-    }
-  </style>
-</head>
-<body>
-<main class="deck" aria-live="polite">
-  <div class="ambient" aria-hidden="true"></div>
-
-  <section class="slide dark active" data-title="Начало">
-    <div class="frame"><div class="content">
-      <div class="hero-meta"><span class="pill">Продуктовая гипотеза</span><span class="pill">MVP · 9 месяцев</span><span class="pill">BAU_TECO</span></div>
-      <h1>ИИ-контроль<br>проектной документации</h1>
-      <p class="lead">Предварительная проверка проектно-сметной документации до подачи в государственную экспертизу</p>
-      <div class="title-rule"></div><div class="footer-line"><span>Гипотеза продукта · команда · бюджет</span><span>Октябрь 2026</span></div>
-      <span class="slide-number">01</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Проблема">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Исходная ситуация</div><h2>Ошибки обнаруживаются слишком поздно</h2>
-      <div class="grid-2">
-        <div class="card"><h3>Документы расходятся</h3><ul><li>разные объёмы в ПЗ, ВОР, сметах и чертежах;</li><li>разные исходные данные и редакции;</li><li>неполный комплект документов;</li><li>устаревшие нормативные ссылки.</li></ul></div>
-        <div class="card tint"><h3>Цикл затягивается</h3><ul><li>заказчик передаёт комплект в экспертизу;</li><li>получает замечания;</li><li>возвращает их проектировщику;</li><li>повторяет подачу после исправлений.</li></ul></div>
-      </div>
-      <div class="statement">Ошибка становится видимой после завершения проектирования — когда её исправление уже дорого.</div>
-      <span class="slide-number">02</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Гипотеза">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Гипотеза</div><h2>Проверять до официальной подачи</h2>
-      <p class="lead">Если автоматически проверять документацию по типовым замечаниям, нормативам и междокументным связям, ошибки можно устранить раньше и сократить число возвратов.</p>
-      <div class="flow">
-        <div class="flow-step"><small>01</small><span>Проектировщик формирует комплект</span></div><div class="flow-arrow">›</div>
-        <div class="flow-step"><small>02</small><span>Система проводит проверку</span></div><div class="flow-arrow">›</div>
-        <div class="flow-step"><small>03</small><span>Ошибки возвращаются на исправление</span></div><div class="flow-arrow">›</div>
-        <div class="flow-step"><small>04</small><span>Комплект уходит в экспертизу</span></div>
-      </div>
-      <p class="muted">Новые замечания проходят инженерную проверку и превращаются в новые правила и тесты — это контролируемое улучшение, а не автоматическое «самообучение».</p>
-      <span class="slide-number">03</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Пользователи">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Пользователи</div><h2>Один продукт — три рабочих сценария</h2>
-      <div class="grid-3">
-        <div class="card persona"><div class="number">1</div><h3>Технический заказчик</h3><ul><li>принимает работу до экспертизы;</li><li>получает доказательные замечания;</li><li>контролирует выполнение задания.</li></ul></div>
-        <div class="card persona"><div class="number">2</div><h3>Проектный институт</h3><ul><li>сверяет разделы и смежников;</li><li>видит изменения исходных данных;</li><li>уменьшает число возвратов.</li></ul></div>
-        <div class="card persona"><div class="number">3</div><h3>Руководитель / ГИП</h3><ul><li>видит готовность комплекта;</li><li>получает критические расхождения;</li><li>контролирует устранение.</li></ul></div>
-      </div>
-      <span class="slide-number">04</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Проверки">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Функциональный контур</div><h2>Пять групп проверок</h2>
-      <div class="grid-5">
-        <div class="check-card"><strong>01 · Комплектность</strong><p>Обязательные документы, структура, приложения, редакции.</p></div>
-        <div class="check-card"><strong>02 · Задание</strong><p>Параметры объекта, технические решения, специальные условия.</p></div>
-        <div class="check-card"><strong>03 · Согласованность</strong><p>ПЗ ↔ ВОР ↔ сметы ↔ спецификации ↔ чертежи.</p></div>
-        <div class="check-card"><strong>04 · Нормативы</strong><p>Актуальность, обязательные ссылки, требования и обоснования.</p></div>
-        <div class="check-card"><strong>05 · Экспертиза</strong><p>Частые замечания, основания, действия и накопление правил.</p></div>
-      </div>
-      <div class="statement">MVP начинается не со «всего проектирования», а с 30–50 приоритетных проверок.</div>
-      <span class="slide-number">05</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Результат">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Формат результата</div><h2>Не общий текст, а доказательное замечание</h2>
-      <div class="issue">
-        <div class="issue-panel"><span class="severity">Критическое расхождение</span><div class="metric">30 ≠ 3</div><p>Объём бетона, м³</p><p class="muted">Уверенность: высокая<br>Статус: требует подтверждения</p></div>
-        <div class="issue-detail">
-          <h3>Необходимо определить действующее значение и синхронизировать документы</h3>
-          <div class="source-row"><span><b>ПЗ</b><br>Раздел 4, страница 42</span><strong>30 м³</strong></div>
-          <div class="source-row"><span><b>ВОР</b><br>Позиция 18</span><strong>3 м³</strong></div>
-          <div class="source-row"><span><b>Действие</b><br>Проверить первичный расчёт и обновить зависимые документы</span><strong>Инженер</strong></div>
-        </div>
-      </div>
-      <span class="slide-number">06</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Границы">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Границы продукта</div><h2>Сначала контроль, затем автоматизация проектирования</h2>
-      <div class="scope">
-        <div class="scope-col in"><h3><span class="dot"></span>Первый контур</h3><ul><li>проверка комплекта документации;</li><li>30–50 приоритетных проверок;</li><li>междокументные сверки;</li><li>подготовка к госэкспертизе;</li><li>инженерное подтверждение.</li></ul></div>
-        <div class="scope-col target"><h3><span class="dot"></span>Целевой продукт</h3><ul><li>автоматизированное проектирование;</li><li>формирование проектных решений;</li><li>расчёты и увязка разделов;</li><li>автоматический выпуск чертежей.</li></ul></div>
-        <div class="scope-col out"><h3><span class="dot"></span>Не входит</h3><ul><li>исполнительная документация;</li><li>строительный контроль;</li><li>прогнозирование нарушений на строительной площадке.</li></ul></div>
-      </div>
-      <span class="slide-number">07</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Архитектура">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Архитектура</div><h2>Код проверяет факты, AI понимает контекст</h2>
-      <div class="architecture">
-        <div class="arch-row"><div class="icon">01</div><div><b>Источники</b><br><small>PDF · XML · DOCX · таблицы</small></div><b>Вход</b></div>
-        <div class="arch-row"><div class="icon">02</div><div><b>Учёт и нормализация</b><br><small>классификация · редакции · показатели · единицы</small></div><b>Данные</b></div>
-        <div class="arch-core"><span>Правила</span><span>Сверки</span><span>База замечаний</span><span>AI / LLM</span></div>
-        <div class="arch-row"><div class="icon">03</div><div><b>Доказательное замечание</b><br><small>источник · основание · критичность · действие</small></div><b>Вывод</b></div>
-        <div class="arch-row"><div class="icon">04</div><div><b>Инженерное подтверждение</b><br><small>принять · отклонить · уточнить · включить в тесты</small></div><b>Контроль</b></div>
-      </div>
-      <span class="slide-number">08</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="План">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Дорожная карта</div><h2>Девять месяцев — три контрольных этапа</h2>
-      <div class="timeline">
-        <div class="phase" data-months="Месяцы 1–3"><div class="phase-no">01</div><h3>Исследование и формализация</h3><ul><li>заказчик и тип объектов;</li><li>контрольные комплекты;</li><li>30–50 формализованных проверок;</li><li>эталон и метрики.</li></ul><span class="gate">Gate: подтверждены данные и ценность</span></div>
-        <div class="phase" data-months="Месяцы 4–6"><div class="phase-no">02</div><h3>Разработка MVP</h3><ul><li>модель документов и показателей;</li><li>правила и AI-проверки;</li><li>источники и интерфейс замечаний;</li><li>тестирование на истории.</li></ul><span class="gate">Gate: воспроизводимый результат</span></div>
-        <div class="phase" data-months="Месяцы 7–9"><div class="phase-no">03</div><h3>Контрольный пилот</h3><ul><li>живой комплект документов;</li><li>сравнение с ручной проверкой;</li><li>время, качество и стоимость;</li><li>готовность платить.</li></ul><span class="gate">Gate: масштабировать или изменить</span></div>
-      </div>
-      <span class="slide-number">09</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Новая команда">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Новая команда</div><h2>Постоянное ядро из трёх ролей</h2>
-      <div class="roles">
-        <div class="role"><span class="fte">1,0 FTE</span><h3>Product Lead / бизнес-системный аналитик</h3><p>Заказчик, требования, документы, проверки, бэклог, метрики, пилот и коммерческая ценность.</p></div>
-        <div class="role primary"><span class="fte">1,0 FTE</span><h3>Lead Applied AI Engineer</h3><p>Архитектура и ключевой код: AI-контур, модели, RAG, MCP, правила, evals, интеграции и код-ревью.</p></div>
-        <div class="role"><span class="fte">1,0 FTE</span><h3>Проектировщик-эксперт</h3><p>Инженерная методология, требования, эталонные ответы, разбор расхождений и профессиональная приёмка.</p></div>
-      </div>
-      <div class="statement">AI Engineer — не только архитектор. Он самостоятельно пишет ключевой продуктовый код.</div>
-      <span class="slide-number">10</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Ресурсы BAU_TECO">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Внутренний вклад BAU_TECO</div><h2>Действующая команда усиливает AI-ядро</h2>
-      <div class="resource-bars">
-        <div class="resource"><b>Backend</b><div class="bar"><span style="--value:50%"></span></div><b>40–50%</b></div>
-        <div class="resource"><b>Frontend</b><div class="bar"><span style="--value:50%"></span></div><b>40–50%</b></div>
-        <div class="resource"><b>DevOps / infra</b><div class="bar"><span style="--value:50%"></span></div><b>40–50%</b></div>
-      </div>
-      <div class="grid-2">
-        <div class="card"><h3>Что делают разработчики</h3><p>API, данные, интерфейс замечаний, интеграции, контуры, деплой, мониторинг и совместимость с текущим стеком.</p></div>
-        <div class="card tint"><h3>Условие выполнимости</h3><p>Загрузка должна быть закреплена в спринтах. Номинальные 40–50% без снятия других задач приведут к срыву сроков.</p></div>
-      </div>
-      <p class="lead"><b>1,2–1,5 FTE</b> — совокупный внутренний ресурс, не входящий в дополнительный бюджет.</p>
-      <span class="slide-number">11</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Команда и бюджет">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Дополнительный бюджет</div><h2>900–950 тыс. ₽ в месяц на новую команду</h2>
-      <div class="budget">
-        <div>
-          <div class="budget-stack"><span class="b1">≈32%</span><span class="b2">≈42%</span><span class="b3">≈26%</span></div>
-          <div class="budget-list">
-            <div class="budget-line"><span>Product Lead / аналитик</span><b>≈ 300 тыс. ₽</b></div>
-            <div class="budget-line"><span>Lead Applied AI Engineer</span><b>350–400 тыс. ₽</b></div>
-            <div class="budget-line"><span>Проектировщик-эксперт</span><b>≈ 250 тыс. ₽</b></div>
-          </div>
-        </div>
-        <div class="card tint"><div class="money">900–950<small>тыс. ₽ в месяц</small></div><p>Полная стоимость трёх новых ставок. Внутренние ресурсы BAU_TECO в эту сумму не входят.</p></div>
-      </div>
-      <span class="slide-number">12</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Технические расходы">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Технический контур</div><h2>200–300 тыс. ₽ в месяц отдельно</h2>
-      <div class="tech-costs">
-        <div class="range-card"><h3>Модели и LLM</h3><div class="range"><div class="range-track"><span style="--w:78%"></span></div><b>70–110</b></div></div>
-        <div class="range-card"><h3>OCR и документы</h3><div class="range"><div class="range-track"><span style="--w:42%"></span></div><b>30–50</b></div></div>
-        <div class="range-card"><h3>Серверы и хранение</h3><div class="range"><div class="range-track"><span style="--w:50%"></span></div><b>40–60</b></div></div>
-        <div class="range-card"><h3>Эксперименты и резерв</h3><div class="range"><div class="range-track"><span style="--w:62%"></span></div><b>60–80</b></div></div>
-        <div class="card dark-card"><h3>Что влияет на расход</h3><p>Количество объектов, объём OCR, частота прогонов и выбранные модели.</p></div>
-      </div>
-      <span class="slide-number">13</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Сводный бюджет">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Сводный бюджет</div><h2>До 12 млн ₽ на девятимесячную проверку гипотезы</h2>
-      <div class="total-budget">
-        <div class="total-card focus"><div class="muted">Управленческий ориентир</div><div class="huge">9,9–11,25</div><h3>млн ₽ за 9 месяцев</h3><p>Новая команда и технические расходы. Внутренний ресурс BAU_TECO учитывается отдельно.</p></div>
-        <div class="total-card"><h3>Распределение по этапам</h3><div class="stage-costs"><div class="stage-cost"><span>1–3 мес.</span><b>3,3–3,75</b></div><div class="stage-cost"><span>4–6 мес.</span><b>3,3–3,75</b></div><div class="stage-cost"><span>7–9 мес.</span><b>3,3–3,75</b></div></div><div class="budget-line"><span>Новая команда</span><b>8,1–8,55 млн ₽</b></div><div class="budget-line"><span>Технические расходы</span><b>1,8–2,7 млн ₽</b></div><div class="budget-line"><span>Внутренний вклад</span><b>1,2–1,5 FTE</b></div></div>
-      </div>
-      <span class="slide-number">14</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Метрики">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Критерии успеха</div><h2>Решение принимается по измеримому результату</h2>
-      <div class="metrics">
-        <div class="metric-card"><strong>01</strong><p>Доля найденных известных замечаний</p></div><div class="metric-card"><strong>02</strong><p>Точность и ложные срабатывания</p></div><div class="metric-card"><strong>03</strong><p>Корректность источников</p></div><div class="metric-card"><strong>04</strong><p>Экономия времени инженера</p></div><div class="metric-card"><strong>05</strong><p>Стоимость анализа объекта</p></div><div class="metric-card"><strong>06</strong><p>Готовность использовать и платить</p></div>
-      </div>
-      <p class="muted">Целевые значения фиксируются после формирования эталонного набора на этапе 1.</p>
-      <span class="slide-number">15</span>
-    </div></div>
-  </section>
-
-  <section class="slide" data-title="Риски">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Риски</div><h2>Что может остановить гипотезу</h2>
-      <div class="risk-grid">
-        <div class="risk"><span>1</span><p>Нет доступа к качественным документам и замечаниям экспертизы.</p></div>
-        <div class="risk"><span>2</span><p>Не закреплён проектировщик-эксперт.</p></div>
-        <div class="risk"><span>3</span><p>Внутренняя команда выделена только номинально.</p></div>
-        <div class="risk"><span>4</span><p>Функции пересекаются с государственным сервисом проверки.</p></div>
-        <div class="risk"><span>5</span><p>Первый тип объектов выбран слишком широко.</p></div>
-        <div class="risk"><span>6</span><p>Ложные срабатывания создают новую нагрузку.</p></div>
-        <div class="risk"><span>7</span><p>Автопроектирование пытаются реализовать раньше проверочного контура.</p></div>
-        <div class="risk"><span>8</span><p>Нет заказчика пилота и подтверждения готовности платить.</p></div>
-      </div>
-      <div class="statement">Поэтому финансируется поэтапная проверка гипотезы, а не заранее обещанный промышленный продукт.</div>
-      <span class="slide-number">16</span>
-    </div></div>
-  </section>
-
-  <section class="slide dark" data-title="Решение">
-    <div class="frame"><div class="content">
-      <div class="eyebrow">Решение встречи</div><h2>Что требуется согласовать сегодня</h2>
-      <div class="decision">
-        <div class="decision-item"><span>1</span><p>Продуктовую гипотезу и границы MVP</p></div><div class="decision-item"><span>2</span><p>Первого заказчика и тип объектов</p></div>
-        <div class="decision-item"><span>3</span><p>Три новые полные ставки</p></div><div class="decision-item"><span>4</span><p>40–50% времени трёх разработчиков BAU_TECO</p></div>
-        <div class="decision-item"><span>5</span><p>900–950 тыс. ₽ в месяц на команду</p></div><div class="decision-item"><span>6</span><p>200–300 тыс. ₽ в месяц на технологии</p></div>
-        <div class="decision-item"><span>7</span><p>Контрольную точку после третьего месяца</p></div><div class="decision-item"><span>8</span><p>Целевой контур автоматического проектирования</p></div>
-      </div>
-      <div class="ask"><strong>Предлагаемое решение</strong><span>Утвердить этап 1 · 3 месяца · 3,3–3,75 млн ₽</span></div>
-      <span class="slide-number">17</span>
-    </div></div>
-  </section>
-
-  <nav class="controls" aria-label="Навигация по презентации">
-    <button id="prev" type="button" aria-label="Предыдущий слайд" title="Предыдущий слайд">←</button>
-    <div class="counter"><span id="current">01</span> / <span id="total">17</span></div>
-    <button id="next" type="button" aria-label="Следующий слайд" title="Следующий слайд">→</button>
-    <a href="ИИ-контроль проектной документации — концепция и бюджет.pdf" download aria-label="Скачать PDF" title="Скачать PDF">PDF</a>
-    <button id="print" type="button" aria-label="Печать презентации" title="Печать / PDF">⎙</button>
-  </nav>
-  <div class="hint">← → листать · Home / End · <span class="mobile-only">свайп</span></div>
-  <div class="progress" id="progress" aria-hidden="true"></div>
-</main>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="ИИ-система для контроля документации и агентного проектирования дорожных объектов"><title>ИИ-система проектирования и экспертизы</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23081428'/%3E%3Cpath d='M7 9h8v5h10v9h-8v-5H7V9Z' fill='%2300c2e5'/%3E%3C/svg%3E"><style>
+:root{--ink:#091730;--ink2:#17305a;--paper:#f5f8fc;--blue:#2d67eb;--cyan:#00b7cf;--muted:#6d7e96;--line:rgba(9,23,48,.13)}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:#061326;color:var(--ink);-webkit-font-smoothing:antialiased}button{font:inherit;cursor:pointer}.deck{width:100%;height:100%;position:relative}.ambient{position:fixed;inset:0;background:radial-gradient(circle at 82% 12%,#00b7cf38,transparent 28%),radial-gradient(circle at 14% 92%,#2d67eb34,transparent 31%),#061326}.slide{position:absolute;inset:0;display:grid;place-items:center;padding:clamp(1rem,3vw,2.7rem);opacity:0;visibility:hidden;transform:translateX(40px) scale(.986);transition:.32s;pointer-events:none}.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto}.slide.previous{transform:translateX(-40px) scale(.986)}.frame{position:relative;width:min(94vw,1600px);height:min(88vh,900px);aspect-ratio:16/9;overflow:hidden;border-radius:1.5rem;background:var(--paper);box-shadow:0 28px 90px #020b1c55}.content{height:100%;padding:clamp(2rem,4.2vw,5rem);display:flex;flex-direction:column;position:relative}.dark .frame{color:white;background:linear-gradient(145deg,#071428,#123564 68%,#087f94 145%)}.dark .frame:after{content:"";position:absolute;width:42%;aspect-ratio:1;border-radius:50%;right:-12%;top:-30%;border:1px solid #ffffff28;box-shadow:0 0 0 90px #ffffff08,0 0 0 180px #ffffff05}.eyebrow{display:flex;align-items:center;gap:.6rem;color:var(--blue);font-size:clamp(.72rem,.85vw,.92rem);letter-spacing:.14em;text-transform:uppercase;font-weight:850}.eyebrow:before{content:"";width:1.8rem;height:3px;background:currentColor}.dark .eyebrow{color:#72e5f1}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2.8rem,5.3vw,6.2rem);line-height:.94;letter-spacing:-.058em;max-width:1200px;margin:auto 0 1.5rem}h2{font-size:clamp(2rem,3.6vw,4.3rem);line-height:1.03;letter-spacing:-.043em;margin:.7rem 0 clamp(1.2rem,2.3vw,2.4rem);max-width:1300px}h3{font-size:clamp(1rem,1.3vw,1.45rem);line-height:1.2;margin:0 0 .55rem}p,li{font-size:clamp(.9rem,1.08vw,1.18rem);line-height:1.42}.lead{font-size:clamp(1.12rem,1.7vw,1.85rem);line-height:1.4;max-width:1120px;color:var(--ink2)}.dark .lead{color:#d9ebfb}.muted{color:var(--muted)}.hero-meta{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:auto}.pill{padding:.5rem .75rem;border:1px solid #ffffff44;border-radius:999px;font-size:.8rem;color:#dcedfa}.foot{border-top:1px solid #ffffff42;padding-top:1rem;display:flex;justify-content:space-between;color:#a9c4db;font-size:.82rem}.grid2,.grid3,.grid4{display:grid;gap:1rem;min-height:0}.grid2{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:repeat(4,1fr)}.card{padding:clamp(1rem,1.5vw,1.55rem);border:1px solid var(--line);border-radius:1.1rem;background:#ffffffd9}.card.blue{background:#e8f0ff;border-color:#c8d9ff}.card.cyan{background:#e5f7f9;border-color:#b6e5eb}.card.darkcard{background:var(--ink);color:white}.card h3{color:var(--blue)}.card.cyan h3{color:#087d8f}.card.darkcard h3{color:#72e5f1}ul{margin:.45rem 0 0;padding-left:1.15rem}li{margin:.35rem 0}li::marker{color:var(--blue)}.tag{display:inline-flex;padding:.38rem .65rem;border-radius:999px;background:#e7efff;color:var(--blue);font-size:.72rem;font-weight:850;text-transform:uppercase}.tag.t2{background:#e3f7f9;color:#087c8d}.statement{margin:auto 0;padding:clamp(1.2rem,2.4vw,2.3rem);border-left:6px solid var(--blue);background:#e8f0ff;font-size:clamp(1.15rem,1.85vw,2rem);line-height:1.3;font-weight:760;border-radius:0 1rem 1rem 0}.branch{display:grid;grid-template-columns:1fr auto 1fr;gap:1.4rem;align-items:stretch;margin:auto 0}.plus{display:grid;place-items:center;font-size:2.5rem;color:var(--cyan);font-weight:900}.index{font-size:3.5rem;line-height:1;color:#d7e3f5;font-weight:900;margin-bottom:.6rem}.foundation{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:1rem;align-items:center;margin:auto 0}.side{display:grid;gap:.65rem}.mini{padding:.8rem;border:1px solid var(--line);border-radius:.7rem;background:white;font-size:.88rem;font-weight:750}.core{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;padding:2rem;background:linear-gradient(145deg,#091730,#17477d);color:white;border:10px solid #e4edff}.core b{font-size:clamp(1.5rem,2.3vw,2.55rem);line-height:1.05}.compare{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;margin:auto 0}.path{padding:1.5rem;border:1px solid var(--line);border-radius:1.1rem;background:white}.path.good{background:#e5f7f9;border-color:#b6e5eb}.pathline{font-size:clamp(1.2rem,1.7vw,1.8rem);font-weight:850;margin:.7rem 0}.architecture{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin:auto 0}.arch{padding:1rem;border:1px solid var(--line);border-radius:.85rem;background:white;min-height:7rem}.arch b{display:block;color:var(--blue);margin-bottom:.4rem}.arch small{font-size:.82rem;line-height:1.35;color:var(--muted)}.arch.primary{background:var(--ink);color:white}.arch.primary b{color:#72e5f1}.arch.primary small{color:#bdd0e3}.model{display:grid;grid-template-columns:.8fr 1.2fr;gap:1.4rem;margin:auto 0}.root{padding:1.5rem;border-radius:1.1rem;background:var(--ink);color:white}.root h3{color:#72e5f1}.items{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}.items span{padding:.7rem;border:1px solid var(--line);border-radius:.65rem;background:white;font-size:.8rem;font-weight:720}.table{display:grid;border:1px solid var(--line);border-radius:1rem;overflow:hidden;margin:auto 0}.row{display:grid;grid-template-columns:1fr 1fr 1fr}.row>div{padding:.8rem 1rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:.84rem}.row>div:last-child{border-right:0}.row:last-child>div{border-bottom:0}.row.head{background:#e8f0ff;color:var(--blue);font-weight:850}.roles,.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:auto 0}.role,.phase{padding:1.25rem;border:1px solid var(--line);border-radius:1.05rem;background:white}.role.primary{background:var(--ink);color:white}.role p,.phase p{font-size:.84rem;color:var(--muted)}.role.primary p{color:#bfd1e3}.fte{font-size:.78rem;color:var(--blue);font-weight:850}.role.primary .fte{color:#72e5f1}.resources{display:flex;gap:.65rem;margin-top:1rem}.resources span{flex:1;text-align:center;padding:.6rem;border-radius:.6rem;background:#e8f0ff;color:var(--blue);font-size:.78rem;font-weight:800}.phase{border-top:4px solid var(--blue)}.phaseNo{font-size:3rem;line-height:1;color:#dce6f5;font-weight:900}.gate{display:block;margin-top:.6rem;padding:.45rem .6rem;border-radius:.55rem;background:#eef3fa;font-size:.73rem;font-weight:750}.moneygrid{display:grid;grid-template-columns:1.1fr .9fr;gap:1.4rem;margin:auto 0}.money{padding:1.5rem;border:1px solid var(--line);border-radius:1.1rem;background:white}.money.focus{background:linear-gradient(145deg,#091730,#173e72);color:white}.huge{font-size:clamp(3rem,5vw,5.6rem);font-weight:900;letter-spacing:-.06em;line-height:.9;margin:.8rem 0}.line{display:flex;justify-content:space-between;gap:1rem;padding:.62rem 0;border-bottom:1px solid var(--line);font-size:.88rem}.riskgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem;margin:auto 0}.risk{display:grid;grid-template-columns:2rem 1fr;gap:.7rem;padding:.7rem .8rem;border:1px solid var(--line);border-radius:.75rem;background:white}.risk b{width:2rem;height:2rem;display:grid;place-items:center;border-radius:.55rem;background:#fff0e1;color:#b96b00}.risk p{font-size:.84rem;margin:.1rem 0}.decisions{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem 1rem;margin:auto 0}.decision{display:flex;gap:.7rem;padding:.62rem 0;border-bottom:1px solid #ffffff28}.decision b{min-width:1.8rem;height:1.8rem;display:grid;place-items:center;border-radius:50%;background:var(--blue);font-size:.75rem}.decision p{font-size:.9rem;margin:.08rem 0}.ask{margin-top:1rem;padding:1rem 1.2rem;border-radius:.85rem;background:#061326;display:flex;justify-content:space-between;gap:1rem}.ask span{color:#7ee8f2}.detailBtn{align-self:flex-start;margin-top:1rem;padding:.7rem 1rem;border:0;border-radius:.7rem;background:var(--ink);color:white;font-weight:800}.slideNo{position:absolute;right:1.7rem;bottom:1.3rem;color:var(--muted);font-size:.76rem;font-weight:750}.dark .slideNo{color:#9ebbd2}.controls{position:fixed;z-index:20;left:50%;bottom:max(1rem,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:.4rem;padding:.4rem;background:#071225dd;border:1px solid #ffffff26;border-radius:999px;backdrop-filter:blur(14px)}.controls button{height:2.4rem;border:0;border-radius:999px;background:transparent;color:white}.controls button:hover{background:#ffffff1d}.round{width:2.4rem}.counter{min-width:4.3rem;text-align:center;color:#dce9f8;font-size:.78rem}.openDetails{padding:0 .9rem!important;color:#77e7f2!important;font-size:.78rem;font-weight:800}.progress{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--cyan));z-index:30}.hint{position:fixed;right:1.2rem;top:1rem;color:#93a9c2;font-size:.73rem}.dossier{position:fixed;inset:0;z-index:50;display:grid;grid-template-columns:minmax(16rem,25rem) 1fr;background:#03101ddd;backdrop-filter:blur(15px);opacity:0;visibility:hidden;transition:.24s}.dossier.open{opacity:1;visibility:visible}.dnav{padding:2rem;background:#08172c;color:white;overflow:auto}.dhead{display:flex;justify-content:space-between;gap:1rem}.dhead h2{font-size:1.65rem;margin:.4rem 0 1rem}.close{width:2.35rem;height:2.35rem;border:1px solid #ffffff33;border-radius:50%;background:transparent;color:white;font-size:1.2rem}.topics{display:grid;gap:.3rem}.topic{display:grid;grid-template-columns:2rem 1fr;gap:.5rem;align-items:center;width:100%;padding:.62rem;border:0;border-radius:.65rem;background:transparent;color:#bed0e2;text-align:left;font-weight:720}.topic span{color:#6e89a8;font-size:.73rem}.topic.active,.topic:hover{background:#17365f;color:white}.dbody{padding:clamp(1.4rem,3.5vw,4rem);background:var(--paper);overflow:auto}.detail{display:none;max-width:1100px;margin:auto}.detail.active{display:block}.detail h2{font-size:clamp(2rem,3.3vw,3.8rem);margin-bottom:1.2rem}.detail .card p,.detail .card li{font-size:1rem}.note{padding:1rem 1.2rem;border-left:5px solid var(--blue);border-radius:0 .8rem .8rem 0;background:#e8f0ff;font-weight:720;margin:1.2rem 0}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}.metric{padding:1rem;border:1px solid var(--line);border-radius:.8rem;background:white}.metric b{display:block;color:var(--blue);font-size:1.5rem}.issue{display:grid;grid-template-columns:.8fr 1.2fr;gap:1rem}.issueValue{padding:1.2rem;border-radius:1rem;background:var(--ink);color:white}.issueValue strong{display:block;font-size:3rem;margin:.8rem 0}.source{display:flex;justify-content:space-between;gap:1rem;padding:.75rem 0;border-bottom:1px solid var(--line)}button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+@media(max-width:900px){.slide{padding:.55rem}.frame{width:100%;height:calc(100vh - 1.1rem);aspect-ratio:auto;border-radius:1rem}.content{padding:1.35rem 1.2rem 4.7rem;overflow:auto}h2{font-size:2rem}.grid2,.grid3,.grid4,.branch,.foundation,.compare,.model,.moneygrid,.roles,.timeline,.riskgrid,.decisions,.issue{grid-template-columns:1fr}.plus{transform:rotate(90deg)}.core{width:13rem;justify-self:center}.architecture{grid-template-columns:1fr 1fr}.items{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}.row.head>div:not(:first-child){display:none}.resources{flex-direction:column}.hint,.slideNo{display:none}.dossier{grid-template-columns:1fr}.dnav{max-height:42vh;padding:1.2rem}.topics{grid-template-columns:1fr 1fr}.topic{font-size:.78rem}.dbody{padding:1.2rem}.metrics{grid-template-columns:1fr 1fr}.openDetails{font-size:0;width:2.4rem;padding:0!important}.openDetails:after{content:"i";font-size:.9rem;border:1px solid #77e7f2;width:1.2rem;height:1.2rem;border-radius:50%;display:grid;place-items:center;margin:auto}}
+</style></head><body><main class="deck"><div class="ambient"></div><div id="slides"></div><nav class="controls"><button class="round" id="prev" aria-label="Назад">←</button><div class="counter"><span id="current">01</span> / <span id="total">15</span></div><button class="round" id="next" aria-label="Вперёд">→</button><button class="openDetails" id="openDetails">Детали экспертизы</button></nav><div class="hint">← → листать · D — детали · Esc — закрыть</div><div class="progress" id="progress"></div></main>
+<aside class="dossier" id="dossier" role="dialog" aria-modal="true" aria-hidden="true"><div class="dnav"><div class="dhead"><div><div class="eyebrow">Расширенный материал</div><h2>Трек 1 · экспертиза</h2></div><button class="close" id="close" aria-label="Закрыть">×</button></div><div class="topics" id="topics"></div></div><div class="dbody" id="details"></div></aside>
 <script>
-  (() => {
-    const slides = [...document.querySelectorAll('.slide')];
-    const current = document.getElementById('current');
-    const total = document.getElementById('total');
-    const progress = document.getElementById('progress');
-    let index = Math.max(0, Math.min(slides.length - 1, Number(location.hash.replace('#','')) - 1 || 0));
-    let touchStart = 0;
-    total.textContent = String(slides.length).padStart(2,'0');
-    function show(next, push = true) {
-      next = Math.max(0, Math.min(slides.length - 1, next));
-      slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === next);
-        slide.classList.toggle('previous', i < next);
-        slide.setAttribute('aria-hidden', i === next ? 'false' : 'true');
-      });
-      index = next;
-      current.textContent = String(index + 1).padStart(2,'0');
-      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
-      document.title = `${slides[index].dataset.title} · ИИ-контроль ПСД`;
-      if (push) history.replaceState(null,'',`#${index + 1}`);
-    }
-    document.getElementById('prev').addEventListener('click', () => show(index - 1));
-    document.getElementById('next').addEventListener('click', () => show(index + 1));
-    document.getElementById('print').addEventListener('click', () => window.print());
-    addEventListener('keydown', e => {
-      if (['ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); show(index + 1); }
-      if (['ArrowLeft','PageUp'].includes(e.key)) { e.preventDefault(); show(index - 1); }
-      if (e.key === 'Home') { e.preventDefault(); show(0); }
-      if (e.key === 'End') { e.preventDefault(); show(slides.length - 1); }
-    });
-    addEventListener('hashchange', () => show(Number(location.hash.replace('#','')) - 1 || 0, false));
-    addEventListener('touchstart', e => touchStart = e.changedTouches[0].clientX, {passive:true});
-    addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - touchStart; if (Math.abs(d) > 55) show(index + (d < 0 ? 1 : -1)); }, {passive:true});
-    show(index, false);
-  })();
-</script>
-</body>
-</html>
+const slides=[
+['dark','Начало',`<div class="hero-meta"><span class="pill">Два продуктовых трека</span><span class="pill">Одна команда</span><span class="pill">9 месяцев</span><span class="pill">BAU_TECO</span></div><h1>ИИ-система для проектирования и экспертизы</h1><p class="lead">Контроль проектной документации до государственной экспертизы и агентное проектирование дорожных объектов</p><div class="foot"><span>Концепция · план · команда · бюджет</span><span>Октябрь 2026</span></div>`],
+['','Два трека',`<div class="eyebrow">Концепция программы</div><h2>Одна платформа — два направления развития</h2><div class="branch"><div class="card blue"><div class="index">01</div><span class="tag">Трек 1</span><h3>Экспертиза и контроль</h3><p>Проверка комплектов, междокументные сверки, правила и доказательные замечания до официальной подачи.</p><button class="detailBtn" data-detail="problem">Раскрыть трек экспертизы</button></div><div class="plus">＋</div><div class="card cyan"><div class="index">02</div><span class="tag t2">Трек 2</span><h3>ИИ-агентное проектирование</h3><p>Управление исходными данными, расчётами, правилами, геометрией и выпуском части документации и чертежей.</p></div></div>`],
+['','Общий фундамент',`<div class="eyebrow">Общее продуктовое ядро</div><h2>Треки используют одни данные, правила и инструменты</h2><div class="foundation"><div class="side"><div class="mini">Исходные документы</div><div class="mini">Замечания экспертизы</div><div class="mini">Нормативные требования</div></div><div class="core"><b>Информационная модель<br>+<br>инженерное ядро</b></div><div class="side"><div class="mini">Расчётные модули</div><div class="mini">Точная геометрия</div><div class="mini">Документация и CAD</div></div></div><div class="statement">Это не два независимых продукта, а два режима одной инженерной системы.</div>`],
+['','Трек 1',`<span class="tag">Трек 1</span><h2>Находить ошибки до государственной экспертизы</h2><div class="grid2"><div class="card"><h3>Что делает система</h3><ul><li>проверяет комплектность и редакции;</li><li>сверяет ПЗ, ВОР, сметы, спецификации и чертежи;</li><li>контролирует требования и нормативы;</li><li>формирует доказательное замечание.</li></ul></div><div class="card blue"><h3>Первый измеримый результат</h3><ul><li>один тип дорожных объектов;</li><li>30–50 приоритетных проверок;</li><li>исторический эталон;</li><li>пилот на живом комплекте.</li></ul></div></div><button class="detailBtn" data-detail="checks">Открыть подробности, метрики и этапы</button>`],
+['','Трек 2',`<span class="tag t2">Трек 2</span><h2>ИИ управляет проектированием, а не рисует результат из текста</h2><div class="compare"><div class="path"><div class="eyebrow">Рискованный путь</div><div class="pathline">ИИ → документация → чертежи</div><ul><li>высокая вероятность ошибок;</li><li>трудоёмкая перепроверка;</li><li>зависимость от модели;</li><li>нет точной геометрии.</li></ul></div><div class="path good"><div class="eyebrow">Предлагаемый путь</div><div class="pathline">ИИ-агент → расчёты → модель → выпуск</div><ul><li>расчёты выполняются кодом;</li><li>каждый шаг воспроизводим;</li><li>AI-модель можно заменить;</li><li>решение принимает проектировщик.</li></ul></div></div>`],
+['','Архитектура',`<div class="eyebrow">Трек 2 · архитектура</div><h2>Агент управляет проверяемым инженерным конвейером</h2><div class="architecture"><div class="arch primary"><b>AI-агент</b><small>Понимает задачу и вызывает инструменты</small></div><div class="arch"><b>Инженерное ядро</b><small>Связывает компоненты и внешние системы</small></div><div class="arch"><b>Информационная модель</b><small>Объекты, параметры, связи и источники</small></div><div class="arch"><b>Расчётные инструменты</b><small>Существующие системы и новые модули</small></div><div class="arch"><b>Правила</b><small>Допустимость инженерных решений</small></div><div class="arch"><b>Геометрический слой</b><small>Построение точной геометрии</small></div><div class="arch"><b>Документация</b><small>Ведомости, листы и шаблоны</small></div><div class="arch"><b>CAD / PDF</b><small>Результат под контролем инженера</small></div></div>`],
+['','Информационная модель',`<div class="eyebrow">Ключевая интеллектуальная собственность</div><h2>Цифровая модель дорожного объекта</h2><div class="model"><div class="root"><h3>Класс «Дорога»</h3><p>Объект разлагается на классы, параметры, связи и источники данных.</p><p class="muted">Модель развивается на реальных проектах.</p></div><div class="items">${['Трасса и ось','Горизонтальная геометрия','Продольный профиль','Поперечные профили','Земляное полотно','Дорожная одежда','Съезды и примыкания','Водоотвод','Сооружения','Организация движения','Освещение','Источники значений'].map(x=>`<span>${x}</span>`).join('')}</div></div>`],
+['','Чертёжный контур',`<div class="eyebrow">Чертёжный контур</div><h2>Два варианта выпуска CAD-листов</h2><div class="grid2"><div class="card"><span class="tag">Вариант 1</span><h3>Собственный движок</h3><p>Open CASCADE / CGAL для геометрии, ezdxf для DXF, шаблоны института.</p><p><b>Плюс:</b> полный контроль.<br><b>Минус:</b> высокая сложность разработки.</p></div><div class="card cyan"><span class="tag t2">Вариант 2</span><h3>Внешняя AI-модель</h3><p>Геометрия остаётся внутри, часть формирования листа передаётся модели после обезличивания.</p><p><b>Плюс:</b> быстрый тест.<br><b>Минус:</b> юридические и санкционные риски.</p></div></div><div class="statement">На пилоте сравниваем точность, контролируемость, стоимость и возможность эксплуатации.</div>`],
+['','Связь треков',`<div class="eyebrow">Повторное использование</div><h2>Проверка создаёт фундамент для проектирования</h2><div class="table"><div class="row head"><div>Общий компонент</div><div>Экспертиза</div><div>Проектирование</div></div>${[['Модель данных','Извлекает и сопоставляет','Хранит объекты и связи'],['Правила','Находят нарушения','Не допускают ошибку'],['Расчёты','Перепроверяют значения','Создают значения и варианты'],['AI-агент','Организует анализ','Организует проектирование']].map(r=>`<div class="row">${r.map((x,i)=>`<div>${i?x:`<b>${x}</b>`}</div>`).join('')}</div>`).join('')}</div>`],
+['','Команда',`<div class="eyebrow">Одна команда</div><h2>Три новые роли отвечают за оба трека</h2><div class="roles"><div class="role"><span class="fte">1,0 FTE</span><h3>Product Lead / аналитик</h3><p>Заказчик, процессы, требования, бэклог, метрики и ценность.</p></div><div class="role primary"><span class="fte">1,0 FTE</span><h3>Lead Applied AI Engineer</h3><p>Архитектура и код, агенты, интеграции, MCP, RAG, правила и evals.</p></div><div class="role"><span class="fte">1,0 FTE</span><h3>Проектировщик-эксперт</h3><p>Процессы, модель, расчёты, нормативы, эталоны и приёмка.</p></div></div><div class="resources"><span>Backend · 40–50%</span><span>Frontend · 40–50%</span><span>DevOps / infra · 40–50%</span></div><button class="detailBtn" data-detail="team">Подробная модель ресурсов</button>`],
+['','План',`<div class="eyebrow">План на 9 месяцев</div><h2>Три этапа — отдельный результат по каждому треку</h2><div class="timeline"><div class="phase"><div class="phaseNo">01</div><h3>1–3 · исследование</h3><p><b>Экспертиза:</b> данные, эталон, проверки.</p><p><b>Проектирование:</b> техаудит CAD, расчётов и API.</p><span class="gate">Данные, интегрируемость, ценность</span></div><div class="phase"><div class="phaseNo">02</div><h3>4–6 · MVP и ядро</h3><p><b>Экспертиза:</b> правила, AI-проверки, интерфейс.</p><p><b>Проектирование:</b> модель, расчёты, агент.</p><span class="gate">Воспроизводимый результат</span></div><div class="phase"><div class="phaseNo">03</div><h3>7–9 · два пилота</h3><p><b>Экспертиза:</b> живой комплект.</p><p><b>Проектирование:</b> расчёт, ведомости, CAD.</p><span class="gate">Масштабировать или изменить</span></div></div><button class="detailBtn" data-detail="roadmap">Подробнее об этапе экспертизы</button>`],
+['','Результат',`<div class="eyebrow">Результат девяти месяцев</div><h2>Два проверенных пилота и единое продуктовое ядро</h2><div class="grid2"><div class="card blue"><span class="tag">Трек 1</span><h3>Контроль документации</h3><ul><li>30–50 проверок с источниками;</li><li>интерфейс замечаний;</li><li>измеренные метрики;</li><li>живой пилот.</li></ul></div><div class="card cyan"><span class="tag t2">Трек 2</span><h3>Агентное проектирование</h3><ul><li>техаудит и модель 2–3 объектов;</li><li>расчётные модули и API;</li><li>прототип агента;</li><li>пилот отдельных CAD-листов.</li></ul></div></div><p class="muted">Полная автоматизация всех разделов не является результатом первого цикла.</p>`],
+['','Бюджет',`<div class="eyebrow">Бюджет программы</div><h2>1,1–1,25 млн ₽ в месяц на два трека</h2><div class="moneygrid"><div class="money focus"><div class="muted">Девятимесячный ориентир</div><div class="huge">9,9–11,25</div><h3>млн ₽</h3><p>Три новые ставки и технические расходы.</p></div><div class="money"><div class="line"><span>Product Lead</span><b>≈ 300 тыс.</b></div><div class="line"><span>Lead AI Engineer</span><b>350–400 тыс.</b></div><div class="line"><span>Проектировщик</span><b>≈ 250 тыс.</b></div><div class="line"><span>Технический контур</span><b>200–300 тыс.</b></div><div class="line"><span>Вклад BAU_TECO</span><b>1,2–1,5 FTE</b></div></div></div><button class="detailBtn" data-detail="budget">Раскрыть затраты</button>`],
+['','Риски',`<div class="eyebrow">Условия реализуемости</div><h2>Что может остановить программу</h2><div class="riskgrid">${['Нет доступа к проектам и замечаниям экспертизы.','Расчётные системы невозможно интегрировать.','Два трека конкурируют за одну команду.','Выбран слишком широкий объект проектирования.','AI-результат нельзя воспроизвести.','Нет заказчика и владельца решений.'].map((x,i)=>`<div class="risk"><b>${i+1}</b><p>${x}</p></div>`).join('')}</div><div class="statement">После третьего месяца точные пилоты утверждаются по результатам техаудита.</div>`],
+['dark','Решение',`<div class="eyebrow">Решение встречи</div><h2>Что требуется согласовать сегодня</h2><div class="decisions">${['Два трека и единое ядро','Первого заказчика и тип объектов','Три новые полные ставки','40–50% ресурсов BAU_TECO','Техаудит в первые три месяца','Контрольную точку по двум направлениям'].map((x,i)=>`<div class="decision"><b>${i+1}</b><p>${x}</p></div>`).join('')}</div><div class="ask"><b>Предлагаемое решение</b><span>Этап 1 · 3 месяца · 3,3–3,75 млн ₽</span></div>`]
+];
+const details=[
+['problem','Проблема',`<div class="eyebrow">01 · Проблема</div><h2>Ошибки обнаруживаются слишком поздно</h2><div class="grid2"><div class="card"><h3>Документы расходятся</h3><ul><li>разные объёмы в ПЗ, ВОР, сметах и чертежах;</li><li>разные исходные данные и редакции;</li><li>неполный комплект;</li><li>устаревшие ссылки.</li></ul></div><div class="card blue"><h3>Цикл затягивается</h3><ul><li>комплект уходит в экспертизу;</li><li>возвращается с замечаниями;</li><li>проектировщик исправляет;</li><li>подача повторяется.</li></ul></div></div><div class="note">Ошибка становится видимой после завершения проектирования — когда её исправление уже дорого.</div>`],
+['users','Пользователи',`<div class="eyebrow">02 · Пользователи</div><h2>Три рабочих сценария</h2><div class="grid3"><div class="card"><h3>Технический заказчик</h3><p>Принимает работу до экспертизы, получает доказательные замечания и контролирует задание.</p></div><div class="card"><h3>Проектный институт</h3><p>Сверяет разделы и смежников, видит изменения данных и снижает число возвратов.</p></div><div class="card"><h3>Руководитель / ГИП</h3><p>Видит готовность комплекта, критические расхождения и статус устранения.</p></div></div>`],
+['checks','Проверки',`<div class="eyebrow">03 · Проверки</div><h2>Пять групп проверок</h2><div class="grid2">${[['Комплектность','Документы, структура, приложения, редакции.'],['Задание','Параметры объекта и специальные условия.'],['Согласованность','ПЗ ↔ ВОР ↔ сметы ↔ спецификации ↔ чертежи.'],['Нормативы','Актуальность ссылок, требования и обоснования.'],['Практика экспертизы','Частые замечания, основания и действия.']].map((x,i)=>`<div class="card ${i===4?'blue':''}"><h3>${x[0]}</h3><p>${x[1]}</p></div>`).join('')}</div><div class="note">MVP начинается с 30–50 приоритетных проверок.</div>`],
+['evidence','Результат',`<div class="eyebrow">04 · Результат</div><h2>Доказательное замечание</h2><div class="issue"><div class="issueValue">Критическое расхождение<strong>30 ≠ 3</strong><p>Объём бетона, м³</p></div><div class="card"><h3>Определить действующее значение</h3><div class="source"><span>ПЗ · раздел 4, стр. 42</span><b>30 м³</b></div><div class="source"><span>ВОР · позиция 18</span><b>3 м³</b></div><div class="source"><span>Действие</span><b>Проверить расчёт</b></div></div></div><div class="note">Источник, основание, критичность, уверенность и рекомендуемое действие.</div>`],
+['scope','Границы MVP',`<div class="eyebrow">05 · Границы</div><h2>Узкий первый продукт</h2><div class="grid3"><div class="card blue"><h3>Входит</h3><ul><li>один тип объектов;</li><li>XML и выбранные PDF;</li><li>30–50 проверок;</li><li>инженерное подтверждение.</li></ul></div><div class="card"><h3>Расширение</h3><ul><li>новые типы объектов;</li><li>новые разделы;</li><li>связь с проектированием;</li><li>автоматический выпуск.</li></ul></div><div class="card"><h3>Не входит</h3><ul><li>исполнительная документация;</li><li>стройконтроль;</li><li>прогноз нарушений на площадке;</li><li>гарантия экспертизы.</li></ul></div></div>`],
+['tech','Архитектура',`<div class="eyebrow">06 · Архитектура</div><h2>Код проверяет факты, AI понимает контекст</h2><div class="grid4"><div class="card"><h3>Источники</h3><p>PDF, XML, DOCX и таблицы.</p></div><div class="card"><h3>Нормализация</h3><p>Редакции, показатели и единицы.</p></div><div class="card darkcard"><h3>Проверки</h3><p>Правила, сверки, база замечаний и LLM.</p></div><div class="card"><h3>Контроль</h3><p>Источник, основание, действие и решение инженера.</p></div></div>`],
+['roadmap','Этапы',`<div class="eyebrow">07 · Этапы трека 1</div><h2>От формализации к пилоту</h2><div class="grid3"><div class="card"><h3>1–3 месяц</h3><ul><li>заказчик и объект;</li><li>комплекты;</li><li>30–50 проверок;</li><li>эталон и метрики.</li></ul></div><div class="card"><h3>4–6 месяц</h3><ul><li>модель документов;</li><li>правила и AI;</li><li>источники и интерфейс;</li><li>исторический тест.</li></ul></div><div class="card blue"><h3>7–9 месяц</h3><ul><li>живой комплект;</li><li>сравнение с ручной проверкой;</li><li>время и стоимость;</li><li>готовность платить.</li></ul></div></div>`],
+['team','Ресурсы',`<div class="eyebrow">08 · Ресурсы</div><h2>Новое ядро и BAU_TECO</h2><div class="grid3"><div class="card"><h3>Product Lead · 1,0</h3><p>Заказчик, требования, бэклог, метрики.</p></div><div class="card darkcard"><h3>AI Engineer · 1,0</h3><p>Архитектор и разработчик ключевого кода.</p></div><div class="card"><h3>Проектировщик · 1,0</h3><p>Методология, нормативы, эталоны.</p></div></div><h3>Внутренний вклад</h3><div class="grid3"><div class="card blue"><b>Backend · 40–50%</b></div><div class="card blue"><b>Frontend · 40–50%</b></div><div class="card blue"><b>DevOps · 40–50%</b></div></div><div class="note">Совокупно 1,2–1,5 FTE, закреплённых в спринтах.</div>`],
+['budget','Затраты',`<div class="eyebrow">09 · Затраты</div><h2>Команда и технический контур</h2><div class="grid2"><div class="card"><h3>Новая команда</h3><div class="line"><span>Product Lead</span><b>300 тыс.</b></div><div class="line"><span>AI Engineer</span><b>350–400 тыс.</b></div><div class="line"><span>Проектировщик</span><b>250 тыс.</b></div><div class="huge" style="font-size:3rem">900–950</div><p>тыс. ₽ в месяц</p></div><div class="card blue"><h3>Технический контур</h3><ul><li>LLM — 70–110 тыс.;</li><li>OCR — 30–50 тыс.;</li><li>серверы — 40–60 тыс.;</li><li>эксперименты — 60–80 тыс.</li></ul><div class="huge" style="font-size:3rem">200–300</div><p>тыс. ₽ в месяц</p></div></div>`],
+['metrics','Метрики',`<div class="eyebrow">10 · Метрики</div><h2>Измеримый результат</h2><div class="metrics">${['Найденные известные замечания','Точность и ложные срабатывания','Корректность источников','Экономия времени инженера','Стоимость анализа объекта','Готовность использовать и платить'].map((x,i)=>`<div class="metric"><b>0${i+1}</b><p>${x}</p></div>`).join('')}</div><div class="note">Целевые значения фиксируются после формирования эталонного набора.</div>`],
+['risks','Риски',`<div class="eyebrow">11 · Риски</div><h2>Что может остановить трек 1</h2><div class="grid2"><div class="card"><ul><li>нет качественных документов;</li><li>не закреплён проектировщик;</li><li>команда выделена номинально;</li><li>объект выбран слишком широко.</li></ul></div><div class="card blue"><ul><li>ложные срабатывания создают нагрузку;</li><li>пересечение с госсервисами;</li><li>нет заказчика пилота;</li><li>не подтверждена готовность платить.</li></ul></div></div><div class="note">Финансируется поэтапная проверка гипотезы, а не заранее обещанный продукт.</div>`]
+];
+const slidesEl=document.getElementById('slides');slidesEl.innerHTML=slides.map((s,i)=>`<section class="slide ${s[0]} ${i===0?'active':''}" data-title="${s[1]}"><div class="frame"><div class="content">${s[2]}<span class="slideNo">${String(i+1).padStart(2,'0')}</span></div></div></section>`).join('');document.getElementById('topics').innerHTML=details.map((d,i)=>`<button class="topic ${i===0?'active':''}" data-topic="${d[0]}"><span>${String(i+1).padStart(2,'0')}</span>${d[1]}</button>`).join('');document.getElementById('details').innerHTML=details.map((d,i)=>`<section class="detail ${i===0?'active':''}" data-panel="${d[0]}">${d[2]}</section>`).join('');
+const slideEls=[...document.querySelectorAll('.slide')],dossier=document.getElementById('dossier');let idx=Math.max(0,Math.min(slideEls.length-1,Number(location.hash.slice(1))-1||0)),touch=0,lastFocus;
+function show(n,push=true){if(dossier.classList.contains('open'))return;n=Math.max(0,Math.min(slideEls.length-1,n));slideEls.forEach((s,i)=>{s.classList.toggle('active',i===n);s.classList.toggle('previous',i<n)});idx=n;current.textContent=String(n+1).padStart(2,'0');progress.style.width=`${(n+1)/slideEls.length*100}%`;document.title=`${slideEls[n].dataset.title} · ИИ-система`;if(push)history.replaceState(null,'',`#${n+1}`)}function topic(name){document.querySelectorAll('.topic').forEach(x=>x.classList.toggle('active',x.dataset.topic===name));document.querySelectorAll('.detail').forEach(x=>x.classList.toggle('active',x.dataset.panel===name));document.querySelector('.dbody').scrollTop=0}function openD(name='problem'){lastFocus=document.activeElement;topic(name);dossier.classList.add('open');dossier.setAttribute('aria-hidden','false');close.focus()}function closeD(){dossier.classList.remove('open');dossier.setAttribute('aria-hidden','true');lastFocus?.focus()}
+prev.onclick=()=>show(idx-1);next.onclick=()=>show(idx+1);openDetails.onclick=()=>openD();close.onclick=closeD;document.querySelectorAll('.detailBtn').forEach(b=>b.onclick=()=>openD(b.dataset.detail));document.querySelectorAll('.topic').forEach(b=>b.onclick=()=>topic(b.dataset.topic));addEventListener('keydown',e=>{if(e.key==='Escape'&&dossier.classList.contains('open'))return closeD();if((e.key==='d'||e.key==='D')&&!dossier.classList.contains('open'))return openD();if(dossier.classList.contains('open'))return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(idx+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(idx-1)}if(e.key==='Home')show(0);if(e.key==='End')show(slideEls.length-1)});addEventListener('hashchange',()=>show(Number(location.hash.slice(1))-1||0,false));addEventListener('touchstart',e=>touch=e.changedTouches[0].clientX,{passive:true});addEventListener('touchend',e=>{if(dossier.classList.contains('open'))return;const d=e.changedTouches[0].clientX-touch;if(Math.abs(d)>55)show(idx+(d<0?1:-1))},{passive:true});total.textContent=String(slideEls.length).padStart(2,'0');show(idx,false);
+</script></body></html>
